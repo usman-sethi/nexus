@@ -163,7 +163,6 @@ export default function App() {
           setShowCodeStep(false);
           setVerificationCode("");
           setSignupSuccess(null);
-          // Reload notifications list
           fetchNotifications();
           if (signupRole === UserRole.STUDENT) {
             setActiveTab("profile");
@@ -231,20 +230,21 @@ export default function App() {
               <img src="/logo.webp" alt="NEXUS logo" className="h-full w-full object-cover" referrerPolicy="no-referrer" />
             </div>
             <div>
-              <h1 className="text-base font-extrabold tracking-tight text-slate-950 leading-none">NEXUS</h1>
-              <span className="text-[9px] font-extrabold font-mono text-slate-600 tracking-wider leading-none block mt-1 uppercase">STUDENT ECOSYSTEM</span>
+              <h1 className="text-base font-extrabold tracking-tight text-slate-955 leading-none">NEXUS</h1>
+              <span className="text-[9px] font-extrabold font-mono text-slate-600 tracking-wider block mt-1 uppercase">STUDENT ECOSYSTEM</span>
             </div>
           </div>
 
-          {/* Core App Role Account switching (Vercel-like deployment bar) */}
+          {/* Core App Role Account switching */}
           <div className="hidden lg:flex items-center gap-1.5 p-1 bg-slate-100 border border-slate-200 rounded-xl" role="group" aria-label="Role Switcher">
-            <span className="text-[10px] font-mono uppercase tracking-wider text-slate-700 font-bold px-2">Inspect:</span>
+            <span className="text-[10px] font-mono uppercase tracking-wider text-slate-750 font-bold px-2">Inspect:</span>
             <button 
+              type="button"
               onClick={() => handleSelectRole(UserRole.STUDENT)}
               disabled={roleSwitching}
               className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
                 session?.role === UserRole.STUDENT 
-                  ? "bg-white text-slate-950 shadow-sm border border-slate-200" 
+                  ? "bg-white text-slate-955 shadow-sm border border-slate-250" 
                   : "text-slate-600 hover:text-slate-900 hover:bg-slate-250/50"
               }`}
               aria-pressed={session?.role === UserRole.STUDENT}
@@ -252,11 +252,12 @@ export default function App() {
               Student Workspace
             </button>
             <button 
+              type="button"
               onClick={() => handleSelectRole(UserRole.CLIENT)}
               disabled={roleSwitching}
               className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
                 session?.role === UserRole.CLIENT 
-                  ? "bg-white text-slate-950 shadow-sm border border-slate-200" 
+                  ? "bg-white text-slate-955 shadow-sm border border-slate-250" 
                   : "text-slate-600 hover:text-slate-900 hover:bg-slate-250/50"
               }`}
               aria-pressed={session?.role === UserRole.CLIENT}
@@ -264,11 +265,12 @@ export default function App() {
               Client / Buyer Workspace
             </button>
             <button 
+              type="button"
               onClick={() => handleSelectRole(UserRole.ADMIN)}
               disabled={roleSwitching}
               className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
                 session?.role === UserRole.ADMIN 
-                  ? "bg-white text-slate-950 shadow-sm border border-slate-200" 
+                  ? "bg-white text-slate-955 shadow-sm border border-slate-250" 
                   : "text-slate-600 hover:text-slate-900 hover:bg-slate-250/50"
               }`}
               aria-pressed={session?.role === UserRole.ADMIN}
@@ -277,11 +279,12 @@ export default function App() {
             </button>
           </div>
 
-          {/* Action Center (Account detail, notifications bell, signup) */}
+          {/* Action Center */}
           <div className="flex items-center gap-3">
             
             {/* Quick register trigger */}
             <button 
+              type="button"
               onClick={handleOpenSignup}
               className="text-xs font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 px-3.5 py-1.5 rounded-xl hover:bg-indigo-100/70 transition-colors flex items-center gap-1 shrink-0"
               aria-label="Process onboarding and sign up"
@@ -293,6 +296,7 @@ export default function App() {
             {session && (
               <div className="relative">
                 <button 
+                  type="button"
                   onClick={() => setShowNotifications(!showNotifications)}
                   className="p-2 bg-slate-50 border border-slate-200 hover:bg-slate-100 text-slate-700 rounded-xl transition-all relative"
                   aria-label={`System alerts. ${unreadNotificationsCount} unread`}
@@ -308,7 +312,7 @@ export default function App() {
 
                 {/* Notifications dropdown list overlay */}
                 {showNotifications && (
-                  <div className="absolute right-0 mt-3 w-80 bg-white border border-slate-100 rounded-2xl shadow-xl z-50 overflow-hidden divide-y divide-slate-100 animate-in fade-in slide-in-from-top-3 duration-200 select-none">
+                   <div className="absolute right-0 mt-3 w-80 bg-white border border-slate-100 rounded-2xl shadow-xl z-50 overflow-hidden divide-y divide-slate-100 animate-in fade-in slide-in-from-top-3 duration-200 select-none">
                     <div className="p-4 bg-slate-50 flex items-center justify-between">
                       <span className="text-xs font-bold text-slate-900">Notifications Desk</span>
                     </div>
@@ -357,7 +361,7 @@ export default function App() {
         </div>
       </header>
 
-      {/* Account inspector toggle visual indicator on smaller viewports */}
+      {/* Account inspector switcher */}
       <div className="lg:hidden bg-indigo-50/50 p-2.5 border-b border-indigo-100 flex items-center justify-center gap-2">
         <span className="text-[9px] font-bold font-mono text-indigo-700">Toggle Inspect Workspace:</span>
         <select 
@@ -371,18 +375,19 @@ export default function App() {
         </select>
       </div>
 
-      {/* Main Tab Navigation Header (Dashboard views selector) */}
-      <nav className="bg-white border-b border-slate-200 shadow-sm select-none" role="tablist" aria-label="Workspace navigations">
+      {/* Main Tab Navigation Header */}
+      <nav className="bg-white border-b border-slate-200 shadow-sm select-none animate-slide-up" role="tablist" aria-label="Workspace navigations">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center gap-4 overflow-x-auto h-12 scrollbar-none">
           <button 
+            type="button"
             role="tab"
             aria-selected={activeTab === "marketplace"}
             aria-controls="nexus-app-root"
             tabIndex={0}
             onClick={() => setActiveTab("marketplace")}
-            className={`h-full text-xs font-bold tracking-tight px-3 border-b-2 flex items-center gap-1.5 transition-all ${
+            className={`h-full text-xs font-bold px-3 border-b-2 flex items-center gap-1.5 transition-all outline-none ${
               activeTab === "marketplace" 
-                ? "border-slate-900 text-slate-950" 
+                ? "border-slate-900 text-slate-955" 
                 : "border-transparent text-slate-500 hover:text-slate-800"
             }`}
           >
@@ -390,14 +395,15 @@ export default function App() {
           </button>
 
           <button 
+            type="button"
             role="tab"
             aria-selected={activeTab === "opportunities"}
             aria-controls="nexus-app-root"
             tabIndex={0}
             onClick={() => setActiveTab("opportunities")}
-            className={`h-full text-xs font-bold tracking-tight px-3 border-b-2 flex items-center gap-1.5 transition-all ${
+            className={`h-full text-xs font-bold px-3 border-b-2 flex items-center gap-1.5 transition-all outline-none ${
               activeTab === "opportunities" 
-                ? "border-slate-900 text-slate-950" 
+                ? "border-slate-900 text-slate-955" 
                 : "border-transparent text-slate-500 hover:text-slate-800"
             }`}
           >
@@ -405,14 +411,15 @@ export default function App() {
           </button>
 
           <button 
+            type="button"
             role="tab"
             aria-selected={activeTab === "messaging"}
             aria-controls="nexus-app-root"
             tabIndex={0}
             onClick={() => setActiveTab("messaging")}
-            className={`h-full text-xs font-bold tracking-tight px-3 border-b-2 flex items-center gap-1.5 transition-all ${
+            className={`h-full text-xs font-bold px-3 border-b-2 flex items-center gap-1.5 transition-all outline-none ${
               activeTab === "messaging" 
-                ? "border-slate-900 text-slate-950" 
+                ? "border-slate-900 text-slate-955" 
                 : "border-transparent text-slate-500 hover:text-slate-800"
             }`}
           >
@@ -421,14 +428,15 @@ export default function App() {
 
           {session?.role === UserRole.STUDENT && (
             <button 
+              type="button"
               role="tab"
               aria-selected={activeTab === "profile"}
               aria-controls="nexus-app-root"
               tabIndex={0}
               onClick={() => setActiveTab("profile")}
-              className={`h-full text-xs font-bold tracking-tight px-3 border-b-2 flex items-center gap-1.5 transition-all ${
+              className={`h-full text-xs font-bold px-3 border-b-2 flex items-center gap-1.5 transition-all outline-none ${
                 activeTab === "profile" 
-                  ? "border-slate-900 text-slate-950" 
+                  ? "border-slate-900 text-slate-955" 
                   : "border-transparent text-slate-500 hover:text-slate-800"
               }`}
             >
@@ -438,14 +446,15 @@ export default function App() {
 
           {session?.role === UserRole.CLIENT && (
             <button 
+              type="button"
               role="tab"
               aria-selected={activeTab === "client-dash"}
               aria-controls="nexus-app-root"
               tabIndex={0}
               onClick={() => setActiveTab("client-dash")}
-              className={`h-full text-xs font-bold tracking-tight px-3 border-b-2 flex items-center gap-1.5 transition-all ${
+              className={`h-full text-xs font-bold px-3 border-b-2 flex items-center gap-1.5 transition-all ${
                 activeTab === "client-dash" 
-                  ? "border-slate-900 text-slate-950" 
+                  ? "border-slate-900 text-slate-955" 
                   : "border-transparent text-slate-500 hover:text-slate-800"
               }`}
             >
@@ -455,14 +464,15 @@ export default function App() {
 
           {session?.role === UserRole.ADMIN && (
             <button 
+              type="button"
               role="tab"
               aria-selected={activeTab === "admin"}
               aria-controls="nexus-app-root"
               tabIndex={0}
               onClick={() => setActiveTab("admin")}
-              className={`h-full text-xs font-bold tracking-tight px-3 border-b-2 flex items-center gap-1.5 transition-all ${
+              className={`h-full text-xs font-bold px-3 border-b-2 flex items-center gap-1.5 transition-all ${
                 activeTab === "admin" 
-                  ? "border-slate-900 text-slate-950" 
+                  ? "border-slate-900 text-slate-955" 
                   : "border-transparent text-slate-500 hover:text-slate-800"
               }`}
             >
@@ -475,11 +485,11 @@ export default function App() {
       {/* Main Content Pane */}
       <main className="flex-grow py-8 relative z-10">
         
-        {/* Onboarding Showcase visual element in main screen when search is empty */}
+        {/* Onboarding Showcase Banner */}
         {activeTab === "marketplace" && !activeChatTarget && (
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
             <div className="bg-gradient-to-br from-indigo-500/10 via-sky-500/5 to-white p-6 sm:p-10 rounded-3xl border border-slate-100 shadow-sm relative overflow-hidden backdrop-blur">
-              <div className="max-w-xl space-y-4 relative z-10">
+              <div className="max-w-xl space-y-4 relative z-10 font-sans">
                 <h3 className="text-3xl font-extrabold tracking-tight text-slate-900 leading-tight">
                   Discover student talent. <br />
                   <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-indigo-600">Build real experiences.</span>
@@ -489,10 +499,10 @@ export default function App() {
                 </p>
                 <div className="flex flex-wrap gap-2 pt-2">
                   <div className="flex items-center gap-1 text-xs text-slate-500 bg-white px-3 py-1.5 rounded-xl border border-slate-100 shadow-sm font-mono">
-                    <Cpu className="h-3.5 w-3.5 text-indigo-500" /> Server-side Gemini 3.5 Active
+                    ✦ Server-side Gemini AI Active
                   </div>
                   <div className="flex items-center gap-1 text-xs text-slate-500 bg-white px-3 py-1.5 rounded-xl border border-slate-100 shadow-sm font-mono">
-                    <Compass className="h-3.5 w-3.5 text-sky-500" /> Peshawar Pilot Division
+                    ⟁ Peshawar Pilot Division
                   </div>
                 </div>
               </div>
@@ -550,6 +560,7 @@ export default function App() {
         <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-in fade-in duration-300" role="dialog" aria-modal="true" aria-labelledby="signup-modal-title">
           <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 max-w-md w-full space-y-6 shadow-2xl relative select-none uppercase-labels">
             <button 
+              type="button"
               onClick={() => {
                 setShowSignup(false);
                 setShowCodeStep(false);
@@ -563,8 +574,8 @@ export default function App() {
               <X className="h-5 w-5" />
             </button>
 
-            <div className="space-y-1.5">
-              <h3 id="signup-modal-title" className="text-xl font-extrabold text-slate-950 tracking-tight font-heading">
+            <div className="space-y-1.5 font-sans">
+              <h3 id="signup-modal-title" className="text-xl font-extrabold text-slate-955 tracking-tight">
                 {showCodeStep ? "Verify Your Email" : "Onboard NEXUS Account"}
               </h3>
               <p className="text-xs text-slate-600">
@@ -576,10 +587,10 @@ export default function App() {
               <form onSubmit={handleSignup} className="space-y-4 text-left">
                 {signupSuccess && (
                   <div className="bg-emerald-50/80 border border-emerald-200/60 rounded-2xl p-4 text-left animate-in fade-in duration-250">
-                    <div className="flex gap-2.5">
+                    <div className="flex gap-2.5 flex-row">
                       <Sparkles className="h-5 w-5 text-emerald-600 shrink-0 mt-0.5" />
                       <div className="space-y-1">
-                        <h4 className="text-xs font-bold text-emerald-950 tracking-tight font-sans">Verification PIN Dispatched</h4>
+                        <h4 className="text-xs font-bold text-emerald-955 tracking-tight font-sans">Verification PIN Dispatched</h4>
                         <p className="text-[11px] text-emerald-800 leading-normal">{signupSuccess}</p>
                       </div>
                     </div>
@@ -588,17 +599,17 @@ export default function App() {
 
                 {signupError && (
                   <div className="bg-red-50/90 border border-red-200/80 rounded-2xl p-4 text-left animate-in slide-in-from-top-2 duration-200 relative">
-                    <div className="flex gap-2.5">
+                    <div className="flex gap-2.5 flex-row">
                       <ShieldAlert className="h-5 w-5 text-red-650 shrink-0 mt-0.5" />
                       <div className="space-y-1.5">
-                        <h4 className="text-xs font-bold text-red-950 tracking-tight font-sans">Verification Error</h4>
+                        <h4 className="text-xs font-bold text-red-955 tracking-tight font-sans">Verification Error</h4>
                         <p className="text-[11px] text-red-850 leading-normal select-text">{signupError}</p>
                       </div>
                     </div>
                   </div>
                 )}
 
-                <div className="space-y-1">
+                <div className="space-y-1 font-sans">
                   <label htmlFor="verification-pin" className="text-[10px] font-bold font-mono uppercase tracking-wider text-slate-700">6-Digit Email Code</label>
                   <input 
                     id="verification-pin"
@@ -617,12 +628,12 @@ export default function App() {
 
                 <button 
                   type="submit"
-                  className="w-full py-3 bg-slate-900 border border-slate-950 text-white rounded-xl text-xs font-bold hover:bg-slate-800 focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:ring-offset-2 transition-all shadow-md"
+                  className="w-full py-3 bg-slate-900 border border-slate-955 text-white rounded-xl text-xs font-bold hover:bg-slate-800 focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:ring-offset-2 transition-all shadow-md font-sans"
                 >
                   Confirm Code & Verify Account
                 </button>
 
-                <div className="text-center pt-2">
+                <div className="text-center pt-2 font-sans">
                   <button 
                     type="button"
                     onClick={() => {
@@ -630,20 +641,20 @@ export default function App() {
                       setSignupSuccess(null);
                       setSignupError(null);
                     }}
-                    className="text-[11px] font-bold font-mono text-indigo-600 hover:text-indigo-800 underline p-1 rounded"
+                    className="text-[11px] font-bold font-mono text-indigo-650 hover:text-indigo-800 underline p-1 rounded"
                   >
                     ← Back to Account Attributes
                   </button>
                 </div>
               </form>
             ) : (
-              <form onSubmit={handleSignup} className="space-y-4 text-left">
+              <form onSubmit={handleSignup} className="space-y-4 text-left font-sans">
                 {signupError && (
                   <div className="bg-red-50/90 border border-red-200/80 rounded-2xl p-4 text-left animate-in slide-in-from-top-2 duration-200 relative">
                     <div className="flex gap-2.5">
                       <ShieldAlert className="h-5 w-5 text-red-650 shrink-0 mt-0.5" />
-                      <div className="space-y-1.5">
-                        <h4 className="text-xs font-bold text-red-950 tracking-tight font-sans">Verification Error</h4>
+                      <div className="space-y-1.5 font-sans">
+                        <h4 className="text-xs font-bold text-red-955 tracking-tight font-sans">Verification Error</h4>
                         <p className="text-[11px] text-red-800 leading-normal select-text">{signupError}</p>
                       </div>
                     </div>
@@ -672,7 +683,7 @@ export default function App() {
                     placeholder="e.g. uzair.cs@uop.edu.pk"
                     value={signupEmail}
                     onChange={(e) => setSignupEmail(e.target.value)}
-                    className="w-full text-sm px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-slate-955 focus-visible:ring-2 focus-visible:ring-slate-950"
+                    className="w-full text-sm px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-slate-955 focus-visible:ring-2 focus-visible:ring-slate-955"
                   />
                 </div>
 
@@ -683,7 +694,7 @@ export default function App() {
                       id="signup-role"
                       value={signupRole}
                       onChange={(e) => setSignupRole(e.target.value as UserRole)}
-                      className="w-full text-sm px-2.5 py-2.5 border border-slate-300 rounded-xl bg-white text-slate-955 focus-visible:ring-2 focus-visible:ring-slate-950 font-medium"
+                      className="w-full text-sm px-2.5 py-2.5 border border-slate-300 rounded-xl bg-white text-slate-955 focus-visible:ring-2 focus-visible:ring-slate-955 font-medium"
                     >
                       <option value={UserRole.STUDENT}>Student Partner</option>
                       <option value={UserRole.CLIENT}>Client Partner</option>
@@ -700,7 +711,7 @@ export default function App() {
                         required
                         value={signupId}
                         onChange={(e) => setSignupId(e.target.value)}
-                        className="w-full text-sm px-3 py-2.5 border border-slate-300 rounded-xl bg-white text-slate-955 focus-visible:ring-2 focus-visible:ring-slate-950"
+                        className="w-full text-sm px-3 py-2.5 border border-slate-300 rounded-xl bg-white text-slate-955"
                       />
                     </div>
                   )}
@@ -714,7 +725,7 @@ export default function App() {
                         id="signup-univ"
                         value={signupUniv}
                         onChange={(e) => setSignupUniv(e.target.value)}
-                        className="w-full text-sm px-2 py-2.5 border border-slate-300 rounded-xl bg-white text-slate-950 focus-visible:ring-2 focus-visible:ring-slate-950"
+                        className="w-full text-sm px-2 py-2.5 border border-slate-300 rounded-xl bg-white text-slate-955"
                       >
                         <option value="University of Peshawar">University of Peshawar</option>
                         <option value="FAST NUCES, Peshawar Campus">FAST NUCES, Peshawar</option>
@@ -728,7 +739,7 @@ export default function App() {
                         id="signup-dept"
                         value={signupDept}
                         onChange={(e) => setSignupDept(e.target.value)}
-                        className="w-full text-sm px-2 py-2.5 border border-slate-300 rounded-xl bg-white text-slate-955 focus-visible:ring-2 focus-visible:ring-slate-950"
+                        className="w-full text-sm px-2 py-2.5 border border-slate-300 rounded-xl bg-white text-slate-955"
                       >
                         <option value="Computer Science">Computer Science</option>
                         <option value="Software Engineering">Software Engineering</option>
@@ -741,7 +752,7 @@ export default function App() {
 
                 <button 
                   type="submit"
-                  className="w-full py-3 bg-slate-900 border border-slate-950 text-white rounded-xl text-xs font-bold hover:bg-slate-800 focus-visible:ring-2 focus-visible:ring-slate-990 focus-visible:ring-offset-2 transition-all shadow-md shadow-slate-350"
+                  className="w-full py-3 bg-slate-900 border border-slate-955 text-white rounded-xl text-xs font-bold hover:bg-slate-800 focus-visible:ring-2 focus-visible:ring-slate-955 focus-visible:ring-offset-2 transition-all shadow-md shadow-slate-300"
                 >
                   Generate & Send Verification PIN
                 </button>
