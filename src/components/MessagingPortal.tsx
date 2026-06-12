@@ -106,8 +106,8 @@ export default function MessagingPortal({ session, activeTargetId }: MessagingPr
         setShowAttForm(false);
         
         // Simulate peer typing immediately for client agent reply
-        const recipient = selectedConv.participants.find(p => p.id !== session.id);
-        if (recipient && recipient.role === UserRole.CLIENT && session.role === UserRole.STUDENT) {
+        const recipient = selectedConv.participants.find(p => p.id !== session?.id);
+        if (recipient && recipient.role === UserRole.CLIENT && session?.role === UserRole.STUDENT) {
           setTyping(true);
           setTimeout(() => {
             setTyping(false);
@@ -120,7 +120,7 @@ export default function MessagingPortal({ session, activeTargetId }: MessagingPr
   };
 
   const getRecipient = (conv: Conversation) => {
-    return conv.participants.find(p => p.id !== session.id);
+    return conv.participants.find(p => p.id !== session?.id);
   };
 
   // Scroll to bottom helper
@@ -166,7 +166,7 @@ export default function MessagingPortal({ session, activeTargetId }: MessagingPr
               const recipient = getRecipient(conv);
               if (!recipient) return null;
               const isSelected = selectedConv?.id === conv.id;
-              const unread = conv.unreadCount[session.id] || 0;
+              const unread = session ? (conv.unreadCount[session.id] || 0) : 0;
 
               return (
                 <div 
@@ -220,7 +220,7 @@ export default function MessagingPortal({ session, activeTargetId }: MessagingPr
               </div>
 
               {/* AI Badge Indicators */}
-              {session.role === UserRole.STUDENT && getRecipient(selectedConv)?.role === UserRole.CLIENT && (
+              {session?.role === UserRole.STUDENT && getRecipient(selectedConv)?.role === UserRole.CLIENT && (
                 <div className="px-2 py-1 rounded bg-indigo-50 border border-indigo-100 flex items-center gap-1">
                   <Sparkles className="h-3 w-3 text-indigo-500 animate-pulse" />
                   <span className="text-[9px] text-indigo-700 font-bold font-mono">Gemini AI Client Pilot Active</span>
@@ -236,7 +236,7 @@ export default function MessagingPortal({ session, activeTargetId }: MessagingPr
                 </div>
               ) : (
                 messages.map(msg => {
-                  const isOwn = msg.senderId === session.id;
+                  const isOwn = msg.senderId === session?.id;
                   return (
                     <div 
                       key={msg.id}

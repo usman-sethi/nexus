@@ -46,6 +46,12 @@ export default function App() {
   const [signupId, setSignupId] = useState("");
   const [googleClientId, setGoogleClientId] = useState<string>("");
   const [showOauthHelp, setShowOauthHelp] = useState(false);
+  const [oauthError, setOauthError] = useState<string | null>(null);
+
+  const handleOpenSignup = () => {
+    setOauthError(null);
+    setShowSignup(true);
+  };
 
   // Seeding/State communication transitions
   const [activeChatTarget, setActiveChatTarget] = useState<string | undefined>(undefined);
@@ -102,6 +108,7 @@ export default function App() {
     // Register callback globally
     (window as any).handleGoogleCredentialResponse = async (response: any) => {
       try {
+        setOauthError(null);
         const res = await fetch("/api/auth/google/verify", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -113,9 +120,13 @@ export default function App() {
           setShowSignup(false);
           // Reload notifications list
           fetchNotifications();
+        } else {
+          const errData = await res.json().catch(() => ({}));
+          setOauthError(errData.error || "The server failed to verify the identity token with Google Services.");
         }
       } catch (error) {
         console.error("Google authentication token verification failed:", error);
+        setOauthError("Local connection timed out while verifying token. Are your proxy filters blocking googleapis.com?");
       }
     };
 
@@ -123,8 +134,11 @@ export default function App() {
     const handleOAuthMessage = async (event: MessageEvent) => {
       if (event.data?.type === 'OAUTH_AUTH_SUCCESS') {
         console.log('[POPUP OAUTH SUCCESS] Authorizing code callback...');
+        setOauthError(null);
         await fetchSession();
         setShowSignup(false);
+      } else if (event.data?.type === 'OAUTH_AUTH_ERROR') {
+        setOauthError(event.data.error || "Google authentication callback returned an authorization error.");
       }
     };
     window.addEventListener('message', handleOAuthMessage);
@@ -144,6 +158,10 @@ export default function App() {
         if ((window as any).google) {
           clearInterval(interval);
           try {
+            if (!googleClientId) {
+              setOauthError("Google OAuth Client ID is missing on this server instance. Please register your client credential in Google Cloud and set the GOOGLE_CLIENT_ID environment variable in your AI Studio secrets panel.");
+              return;
+            }
             (window as any).google.accounts.id.initialize({
               client_id: googleClientId,
               callback: (window as any).handleGoogleCredentialResponse,
@@ -157,8 +175,9 @@ export default function App() {
                 text: "continue_with"
               });
             }
-          } catch (e) {
+          } catch (e: any) {
             console.warn("GIS initialization delayed:", e);
+            setOauthError("Failed to initialize Google Sign-In script programmatically: " + (e?.message || e));
           }
         }
       }, 100);
@@ -169,6 +188,7 @@ export default function App() {
   // Method to open standard popup authorization page as fallback as per guidelines
   const handlePopupGoogleAuth = async () => {
     try {
+      setOauthError(null);
       const res = await fetch("/api/auth/google/url");
       if (res.ok) {
         const { url } = await res.json();
@@ -181,14 +201,19 @@ export default function App() {
           "NEXUS Authorize Node",
           `width=${width},height=${height},left=${left},top=${top},status=no,resizable=yes`
         );
+      } else {
+        const errData = await res.json().catch(() => ({}));
+        setOauthError(errData.error || "The server returned an error generating the Google authorization url.");
       }
     } catch (err) {
       console.error("Unable to initiate Popup OAuth Authorization:", err);
+      setOauthError("Unable to open secure Google popup. Ensure popups are not blocked by your browser extensions.");
     }
   };
 
   const handleSimulateGoogleAuth = async () => {
     try {
+      setOauthError(null);
       const mockPayload = {
         email: signupEmail || "mohammad.khyber@uop.edu.pk",
         name: signupName || "Mohammad Khyber",
@@ -209,9 +234,13 @@ export default function App() {
         setSession(data);
         setShowSignup(false);
         fetchNotifications();
+      } else {
+        const errData = await res.json().catch(() => ({}));
+        setOauthError(errData.error || "The bypass endpoint failed to register the identity token.");
       }
     } catch (error) {
       console.error("Google authentication simulation failed:", error);
+      setOauthError("Offline bypass simulated verification failed. Is the Express server online?");
     }
   };
 
@@ -383,7 +412,7 @@ export default function App() {
             
             {/* Quick register trigger */}
             <button 
-              onClick={() => setShowSignup(true)}
+              onClick={handleOpenSignup}
               className="text-xs font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 px-3.5 py-1.5 rounded-xl hover:bg-indigo-100/70 transition-colors flex items-center gap-1 shrink-0"
               aria-label="Process onboarding and sign up"
             >
@@ -662,6 +691,29 @@ export default function App() {
               <h3 id="signup-modal-title" className="text-xl font-extrabold text-slate-950 tracking-tight font-heading">Onboard NEXUS Account</h3>
               <p className="text-xs text-slate-600">Become part of Pakistan's premier student opportunity platform.</p>
             </div>
+
+            {oauthError && (
+              <div id="oauth-error-banner" className="bg-red-50/90 border border-red-200/80 rounded-2.5xl p-4 text-left animate-in slide-in-from-top-2 duration-200 relative">
+                <button 
+                  type="button"
+                  onClick={() => setOauthError(null)}
+                  className="absolute top-3.5 right-3.5 p-1 rounded-md text-red-400 hover:bg-red-100 hover:text-red-700 transition-colors"
+                  aria-label="Dismiss warning message"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+                <div className="flex gap-2.5">
+                  <ShieldAlert className="h-5 w-5 text-red-650 shrink-0 mt-0.5" />
+                  <div className="space-y-1.5">
+                    <h4 className="text-xs font-bold text-red-950 tracking-tight font-sans">Google Connection Check</h4>
+                    <p className="text-[11px] text-red-800 leading-normal pr-4 select-text">{oauthError}</p>
+                    <div className="pt-2 flex flex-wrap gap-1.5 text-[10px] text-red-900 border-t border-red-200/50 mt-1.5 font-sans">
+                      <span>💡 <strong>Quick Fix:</strong> Click <strong>"Solve matching origin mismatch issues?"</strong> below to view whitelisted domain parameters or utilize the emerald <strong>Quick Dev Bypass</strong>.</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
 
             <form onSubmit={handleSignup} className="space-y-4 text-left">
               <div className="space-y-1">

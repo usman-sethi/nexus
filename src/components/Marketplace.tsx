@@ -160,7 +160,7 @@ export default function Marketplace({ session, onOpenChat, onPostSuccess }: Mark
             Gigs are continuously organized dynamically, prioritizing students with high Campus Reputation Scores (CRS).
           </p>
         </div>
-        {session.role === UserRole.STUDENT && (
+        {session?.role === UserRole.STUDENT && (
           <button 
             onClick={() => setShowForm(!showForm)}
             className="px-5 py-3 rounded-xl bg-white text-slate-950 font-bold text-xs uppercase flex items-center gap-1.5 hover:bg-slate-50 shrink-0 relative z-10 transition-all shadow-lg"
@@ -454,7 +454,7 @@ export default function Marketplace({ session, onOpenChat, onPostSuccess }: Mark
                     </div>
                     
                     <div className="flex gap-1.5">
-                      {session.id !== gig.studentId && (
+                      {session?.id !== gig.studentId && (
                         <>
                           <button 
                             onClick={() => onOpenChat(gig.studentId)}
