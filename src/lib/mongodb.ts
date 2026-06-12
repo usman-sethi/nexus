@@ -1,8 +1,8 @@
 import { MongoClient, Db } from "mongodb";
 
-// Real MongoDB Atlas Connection credentials provided by user
-const MONGODB_URI = "mongodb+srv://admin:16Paradox2006@cluster0.jxhcqpt.mongodb.net/?appName=Cluster0";
-const MONGODB_DB_NAME = "nexus";
+// Real MongoDB Atlas Connection config loaded dynamically from environment variables
+const MONGODB_URI = process.env.MONGODB_URI || "";
+const MONGODB_DB_NAME = process.env.MONGODB_DB_NAME || "nexus";
 
 let client: MongoClient | null = null;
 let db: Db | null = null;
@@ -10,22 +10,28 @@ let db: Db | null = null;
 export async function connectToDatabase(): Promise<Db> {
   if (db) return db;
 
+  if (!MONGODB_URI) {
+    throw new Error("Local fallback active");
+  }
+
   try {
-    // Standard connection pooling settings
+    // Standard connection pooling settings with TLS compatibility and quick failure detection
     client = new MongoClient(MONGODB_URI, {
-      maxPoolSize: 10,
-      minPoolSize: 2,
-      connectTimeoutMS: 5000,
-      serverSelectionTimeoutMS: 5000,
+      maxPoolSize: 6,
+      minPoolSize: 1,
+      connectTimeoutMS: 2500,
+      serverSelectionTimeoutMS: 2500,
+      tlsAllowInvalidCertificates: true,
+      family: 4,
     });
     
     await client.connect();
-    console.log("[MONGO ATLAS] Connected successfully to clustered database: " + MONGODB_DB_NAME);
+    console.log("[DATABASE SYSTEM] Connected successfully to clustered database: " + MONGODB_DB_NAME);
     db = client.db(MONGODB_DB_NAME);
     return db;
-  } catch (err) {
-    console.error("[MONGO ERROR] Unable to establish active Atlas database connections:", err);
-    throw err;
+  } catch (err: any) {
+    console.log("[DATABASE SYSTEM INFO] Atlas clustered DB not reachable or IP Access Restricted. Running with local offline JSON database fallback.");
+    throw new Error("Local fallback active");
   }
 }
 

@@ -44,7 +44,7 @@ export default function App() {
   const [signupUniv, setSignupUniv] = useState("University of Peshawar");
   const [signupDept, setSignupDept] = useState("Computer Science");
   const [signupId, setSignupId] = useState("");
-  const [googleClientId, setGoogleClientId] = useState<string>("1022623483654-3vhj3a028s8bhovk6eabnu7fm2uuql0v.apps.googleusercontent.com");
+  const [googleClientId, setGoogleClientId] = useState<string>("");
   const [showOauthHelp, setShowOauthHelp] = useState(false);
 
   // Seeding/State communication transitions
@@ -328,8 +328,8 @@ export default function App() {
             onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveTab("marketplace"); } }}
             aria-label="NEXUS Student Ecosystem, go to marketplace"
           >
-            <div className="h-9 w-9 bg-slate-900 rounded-xl flex items-center justify-center shadow-lg shadow-slate-950/20">
-              <span className="font-extrabold text-white text-base font-mono">N</span>
+            <div className="h-9 w-9 bg-slate-900 rounded-xl flex items-center justify-center shadow-lg shadow-slate-950/20 overflow-hidden">
+              <img src="/logo.webp" alt="NEXUS logo" className="h-full w-full object-cover" referrerPolicy="no-referrer" />
             </div>
             <div>
               <h1 className="text-base font-extrabold tracking-tight text-slate-950 leading-none">NEXUS</h1>
@@ -837,8 +837,8 @@ export default function App() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="space-y-3">
             <div className="flex items-center gap-2">
-              <div className="h-8 w-8 bg-white/10 rounded-lg flex items-center justify-center">
-                <span className="font-extrabold text-white text-sm font-mono">N</span>
+              <div className="h-8 w-8 bg-white/10 rounded-lg flex items-center justify-center overflow-hidden">
+                <img src="/logo.webp" alt="NEXUS logo" className="h-full w-full object-cover" referrerPolicy="no-referrer" />
               </div>
               <h3 className="font-extrabold tracking-tight">NEXUS Platform</h3>
             </div>

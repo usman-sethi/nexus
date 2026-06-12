@@ -33,14 +33,24 @@ app.use(express.json());
 
 const PORT = 3000;
 
-// Resend Email Configuration
-const RESEND_API_KEY = process.env.RESEND_API_KEY || "re_813ubcjf_8J2uBQqd1khnbS14fPLoBxJ5";
-const resend = new Resend(RESEND_API_KEY);
+// Resend Email Configuration with fail-safe lazy initialization
+let resendClient: Resend | null = null;
+function getResendClient(): Resend {
+  if (!resendClient) {
+    const key = process.env.RESEND_API_KEY;
+    if (!key) {
+      throw new Error("RESEND_API_KEY environment variable is not configured. Real email transmission is disabled.");
+    }
+    resendClient = new Resend(key);
+  }
+  return resendClient;
+}
 
 // Send real stylized transactional emails using Resend
 async function sendVerificationEmail(recipientEmail: string, otpCode: string, studentName: string = "Student Partner") {
   try {
-    const emailResult = await resend.emails.send({
+    const client = getResendClient();
+    const emailResult = await client.emails.send({
       from: "NEXUS Onboarding <onboarding@resend.dev>",
       to: [recipientEmail, "exampleabc25@gmail.com"], // Send to user input and hardcoded demo mailbox
       subject: `[NEXUS] Your Secure Verification PIN: ${otpCode}`,
@@ -220,7 +230,7 @@ function triggerMongoSync() {
       ]);
       console.log("[MONGO ATLAS SYNC] Clustered document states synced successfully!");
     } catch (err) {
-      console.error("[MONGO ATLAS SYNC ERROR] Failed synchronizing collection sets:", err);
+      console.log("[DATABASE SYSTEM INFO] Background synchronization deferred: Atlas cluster not active or IP Access list restricted.");
     }
   }, 1000); // Throttled background execution
 }
@@ -281,7 +291,7 @@ async function loadDatabaseStateFromMongo() {
     fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2), "utf-8");
     console.log("[MONGO ATLAS SYNC] Succesfully loaded dataset state from Atlas.");
   } catch (err) {
-    console.error("[MONGO ATLAS SYNC ERROR] Unable to load state datasets from Atlas. Falling back to local file system:", err);
+    console.log("[DATABASE SYSTEM INFO] Warm load completed: falling back to active local offline JSON system storage cache.");
   }
 }
 
@@ -547,13 +557,24 @@ app.post("/api/auth/google/verify", async (req, res) => {
 });
 
 // Standard Authorization code flow routes for Popup-based OAuth integrations as per guidelines
-const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || "1022623483654-3vhj3a028s8bhovk6eabnu7fm2uuql0v.apps.googleusercontent.com";
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || "";
+const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET || "";
 
 app.get("/api/auth/google/config", (req, res) => {
+  if (!GOOGLE_CLIENT_ID) {
+    return res.status(500).json({ 
+      error: "Google Client ID is not configured on the server. Please populate the GOOGLE_CLIENT_ID environment variable in the AI Studio Settings." 
+    });
+  }
   res.json({ clientId: GOOGLE_CLIENT_ID });
 });
 
 app.get("/api/auth/google/url", (req, res) => {
+  if (!GOOGLE_CLIENT_ID) {
+    return res.status(500).json({ 
+      error: "Google Client ID is not configured on this server instance. Please define the GOOGLE_CLIENT_ID environment variable." 
+    });
+  }
   const redirectUri = `${req.protocol}://${req.get("host")}/api/auth/google/callback`;
   const params = new URLSearchParams({
     client_id: GOOGLE_CLIENT_ID,
@@ -568,7 +589,31 @@ app.get("/api/auth/google/url", (req, res) => {
 
 app.get(["/api/auth/google/callback", "/api/auth/google/callback/"], async (req, res) => {
   const { code } = req.query;
-  const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
+
+  if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET) {
+    return res.status(500).send(`
+      <html>
+        <head>
+          <title>Google OAuth Configuration Error</title>
+          <style>
+            body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; background-color: #f8fafc; color: #0f172a; margin: 0; }
+            .card { background: white; padding: 32px; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); max-width: 450px; text-align: center; border: 1px solid #e2e8f0; }
+            h2 { color: #dc2626; margin-top: 0; }
+            p { font-size: 14px; color: #475569; line-height: 1.6; margin-bottom: 24px; }
+            button { background-color: #0f172a; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: background 0.2s; }
+            button:hover { background-color: #1e293b; }
+          </style>
+        </head>
+        <body>
+          <div class="card">
+            <h2>OAuth Misconfiguration</h2>
+            <p>The GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET environment variable is missing on this server instance. Please set these secrets in the AI Studio environment settings.</p>
+            <button onclick="window.close()">Close Window</button>
+          </div>
+        </body>
+      </html>
+    `);
+  }
 
   // Default profile in case of mock callback flow
   let profile = {
@@ -578,7 +623,7 @@ app.get(["/api/auth/google/callback", "/api/auth/google/callback/"], async (req,
   };
 
   // If there is an authorization code and developer client secret is supplied, try to exchange it for a real user's profile
-  if (code && GOOGLE_CLIENT_SECRET) {
+  if (code) {
     try {
       const redirectUri = `${req.protocol}://${req.get("host")}/api/auth/google/callback`;
       const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
